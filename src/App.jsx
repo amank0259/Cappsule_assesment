@@ -1,10 +1,13 @@
 import React from 'react';
-import SearchPage from './Component/SearchPage';
+import Header from './Component/Header';
+import { Route, Router, Routes } from 'react-router-dom';
 
 function App() {
   return (
     <div className='h-screen bg-slate-100 mx-auto overflow-y-scroll'>
-      <SearchPage />
+      <Routes>
+        <Route path='*' element={<Header />} />
+      </Routes>
     </div>
   )
 }
