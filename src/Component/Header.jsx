@@ -3,48 +3,44 @@ import { FiSearch } from "react-icons/fi";
 import { MdArrowBack } from "react-icons/md";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import SearchPage from "./SearchPage";
-import axios from '../utils/axios'
 
 function Header() {
     const [search, setSearch] = useState("");
     const [results, setResults] = useState([]);
     const navigate = useNavigate();
 
+    // Fetch data from API
     const getSearches = async () => {
         try {
-            const { data } = await axios.get(`/new_search?q=${search}&pharmacyIds=1,23`);
+            const response = await fetch(`https://backend.cappsule.co.in/api/v1/new_search?q=${encodeURIComponent(search)}&pharmacyIds=1,2,3`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
             setResults(data.results);
         } catch (err) {
-            console.log("error:", err);
+            console.error("Error fetching data:", err);
             setResults([]); // Clear previous results in case of error
         }
-    }
-
-    // https://backend.cappsule.co.in/api/v1/new_search?q=paracetamol&pharmacyIds=1,2,3
-
+        console.log("data:", data)
+    };
 
     // handle the search functionality
     const handleSearch = () => {
         if (search.trim() === "") {
-            setResults([]);      //to get the result
-            navigate("/");      //to get back to main page
+            setResults([]);      // Clear previous results
+            navigate("/");      // Navigate to main page
         } else {
-            setResults([search]);
-            navigate(`/search/${encodeURIComponent(search)}`);   //to navigate search page
+            navigate(`/search/${encodeURIComponent(search)}`);   // Navigate to search page
         }
     };
 
-    // hendle enter button to search
+    // handle enter button to search
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             handleSearch();
         }
     };
-
-    useEffect(() => {
-        getSearches();
-    }, [search]);
-
 
     // Function to clear the search 
     const clearSearch = () => {
@@ -52,6 +48,12 @@ function Header() {
         setResults([]);
         navigate("/");
     };
+
+    // Log results after 3 seconds (for testing)
+    useEffect(() => {
+        getSearches();
+        console.log(results);
+    }, [results]);
 
     return (
         <>
@@ -86,7 +88,6 @@ function Header() {
             </Routes>
         </>
     );
-
 }
 
 export default Header;
