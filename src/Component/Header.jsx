@@ -3,11 +3,24 @@ import { FiSearch } from "react-icons/fi";
 import { MdArrowBack } from "react-icons/md";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import SearchPage from "./SearchPage";
+import axios from '../utils/axios'
 
 function Header() {
     const [search, setSearch] = useState("");
     const [results, setResults] = useState([]);
     const navigate = useNavigate();
+
+    const getSearches = async () => {
+        try {
+            const { data } = await axios.get(`/new_search?q=${search}&pharmacyIds=1,23`);
+            setResults(data.results);
+        } catch (err) {
+            console.log("error:", err);
+            setResults([]); // Clear previous results in case of error
+        }
+    }
+
+    // https://backend.cappsule.co.in/api/v1/new_search?q=paracetamol&pharmacyIds=1,2,3
 
 
     // handle the search functionality
@@ -29,6 +42,7 @@ function Header() {
     };
 
     useEffect(() => {
+        getSearches();
     }, [search]);
 
 
@@ -61,8 +75,8 @@ function Header() {
                 <button onClick={handleSearch} className='absolute right-10 text-[18px] py-2 px-6 text-blue-800 font-bold'>Search</button>
             </div>
             {/* Show results */}
-            {results.length === 0 && (
-                <div className='flex items-center justify-center h-[90%]'>
+            {search.length === 0 && (
+                <div className='heading flex items-center justify-center h-[90%]'>
                     <h1 className='text-xl md:text-2xl font-semibold text-zinc-500'>"Find medicines with amazing discount"</h1>
                 </div>
             )}
@@ -72,6 +86,7 @@ function Header() {
             </Routes>
         </>
     );
+
 }
 
 export default Header;
