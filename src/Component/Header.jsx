@@ -3,45 +3,38 @@ import { FiSearch } from "react-icons/fi";
 import { MdArrowBack } from "react-icons/md";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import SearchPage from "./SearchPage";
-// import axios from '../utils/axios'
+import axios from 'axios';
 
 function Header() {
     const [search, setSearch] = useState("");
     const [results, setResults] = useState([]);
     const navigate = useNavigate();
 
+    const getSearchResult = () => {
+        const api = `https://backend.cappsule.co.in/api/v1/new_search?q=${encodeURIComponent(search)}&pharmacyIds=1,2,3`;
+
+        axios.get(api).then((response) => {
+            // Adjust this line based on the actual structure of your response
+            setResults(response.data.data); // Access the nested data
+        }).catch((err) => console.log(err));
+    }
+
     useEffect(() => {
-        const getSearches = async () => {
-            try {
-                const response = await fetch(`https://backend.cappsule.co.in/api/v1/new_search?q=${encodeURIComponent(search)}&pharmacyIds=1,2,3`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                setResults(data); // Update results state with fetched data
-            } catch (err) {
-                console.error("Error fetching data:", err);
-                setResults([]); // Clear previous results in case of error
-            }
-        };
-
-        getSearches(); // Fetch data when component mounts
-    }, [search]);
-
-    console.log(results);
+        console.log(results);
+    }, [results]);
 
     // handle the search functionality
     const handleSearch = () => {
         if (search.trim() === "") {
-            setResults([]);      //to get the result
-            navigate("/");      //to get back to main page
+            setResults([]);      // Clear results if search is empty
+            navigate("/");       // Navigate to main page
         } else {
-            setResults([search]);
-            navigate(`/search/${encodeURIComponent(search)}`);   //to navigate search page
+            getSearchResult();    // Fetch results from API
+            navigate(`/search/${encodeURIComponent(search)}`);   // Navigate to search page
         }
     };
 
-    // hendle enter button to search
+    // Handle enter key press to search
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             handleSearch();
@@ -77,14 +70,14 @@ function Header() {
                 <button onClick={handleSearch} className='absolute right-10 text-[18px] py-2 px-6 text-blue-800 font-bold'>Search</button>
             </div>
             {/* Show results */}
-            {results && results.length > 0 ? (< Routes >
+            <Routes>
                 <Route path="/search/:query" element={<SearchPage results={results} />} />
-            </Routes >) : (
-                <div className='heading flex items-center justify-center h-[90%]'>
-                    <h1 className='text-xl md:text-2xl font-semibold text-zinc-500'>"Find medicines with amazing discount"</h1>
-                </div>
-            )
-            }
+                <Route path="/" element={
+                    <div className='heading flex items-center justify-center h-[90%]'>
+                        <h1 className='text-xl md:text-2xl font-semibold text-zinc-500'>"Find medicines with amazing discount"</h1>
+                    </div>
+                } />
+            </Routes>
         </>
     );
 }
